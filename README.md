@@ -24,9 +24,9 @@ The teacher link and student link are therefore genuinely different, and the tea
 ### 1) Supabase — create the database
 1. Create a project at [supabase.com](https://supabase.com).
 2. Open **SQL Editor → New query**, paste the contents of [`supabase.sql`](supabase.sql), and **Run**. This creates the `tasks` and `submissions` tables and locks them down.
-3. Open **Project Settings → API** and copy two values:
+3. Open **Project Settings → API keys** and copy two values:
    - **Project URL** → this is `SUPABASE_URL`
-   - **`service_role` secret** → this is `SUPABASE_SERVICE_ROLE_KEY` (⚠️ secret — never put it in the frontend or commit it)
+   - the **secret key** (starts with `sb_secret_`) → this is `SUPABASE_SECRET_KEY` (⚠️ secret — never put it in the frontend or commit it). The legacy `service_role` key also works.
 
 ### 2) GitHub — push the code
 ```bash
@@ -46,7 +46,7 @@ git push -u origin main
    | Name | Value |
    |------|-------|
    | `SUPABASE_URL` | your Supabase Project URL |
-   | `SUPABASE_SERVICE_ROLE_KEY` | your Supabase `service_role` secret |
+   | `SUPABASE_SECRET_KEY` | your Supabase secret key (`sb_secret_…`) |
    | `TEACHER_KEY` | a long private string you choose |
 
 ### 4) Your two links
