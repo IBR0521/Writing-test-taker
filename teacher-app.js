@@ -40,7 +40,13 @@
 
   document.addEventListener('click', function (e) {
     var rm = e.target.getAttribute && e.target.getAttribute('data-remove');
-    if (rm) { images[rm] = null; renderPreview(rm); }
+    if (rm) {
+      images[rm] = null;
+      renderPreview(rm);
+      // Apply immediately so the image is really gone for students, not just
+      // hidden in the editor until the next Save.
+      publish('✅ Image removed. Students no longer see it.');
+    }
   });
 
   function handleFile(which, file) {
@@ -86,7 +92,7 @@
   wireDropzone('task1');
   wireDropzone('task2');
 
-  el('saveBtn').addEventListener('click', function () {
+  function publish(okMsg) {
     var status = el('saveStatus');
     status.textContent = 'Saving…';
     status.className = 'status';
@@ -94,21 +100,23 @@
       task1: { text: el('task1Text').value, image: images.task1 },
       task2: { text: el('task2Text').value, image: images.task2 },
     };
-    fetch('/api/tasks?key=' + encodeURIComponent(KEY), {
+    return fetch('/api/tasks?key=' + encodeURIComponent(KEY), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     })
       .then(function (r) {
         if (!r.ok) throw new Error('save failed');
-        status.textContent = '✅ Published. Students will see these tasks.';
+        status.textContent = okMsg || '✅ Published. Students will see these tasks.';
         status.className = 'status ok';
       })
       .catch(function () {
         status.textContent = '⚠️ Could not save. Check your teacher link/key.';
         status.className = 'status bad';
       });
-  });
+  }
+
+  el('saveBtn').addEventListener('click', function () { publish(); });
 
   // ---------- results ----------
 
