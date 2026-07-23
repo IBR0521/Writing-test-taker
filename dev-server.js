@@ -20,6 +20,7 @@ const {
   handleTasks,
   handleSubmissions,
   handleTeacher,
+  handleCheck,
   respond,
   TEACHER_KEY,
 } = require('./lib/handlers');
@@ -76,6 +77,9 @@ const server = http.createServer(async (req, res) => {
   }
   if (p === '/api/submissions') {
     return respond(res, await handleSubmissions(method, query, await readBody(req)));
+  }
+  if (p === '/api/check') {
+    return respond(res, await handleCheck(method, query, await readBody(req)));
   }
   if (p === '/teacher' || p === '/api/teacher') {
     return respond(res, handleTeacher(query));

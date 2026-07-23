@@ -186,6 +186,106 @@
     if (idx != null) openEssay(currentSubs[Number(idx)]);
   });
 
+  // ---- writing checker (teacher-only) --------------------------------------
+
+  var TYPE_LABEL = {
+    spelling: 'spelling', grammar: 'grammar',
+    punctuation: 'punctuation', style: 'style',
+  };
+
+  function escAttr(s) { return esc(s).replace(/"/g, '&quot;'); }
+
+  function plain(text) {
+    return text && text.trim() ? esc(text) : '<span class="muted">(empty)</span>';
+  }
+
+  // Rebuild the essay with each mistake wrapped in a <mark>.
+  function renderMarked(text, matches) {
+    if (!text || !text.trim()) return '<span class="muted">(empty)</span>';
+    var ms = (matches || []).slice().sort(function (a, b) { return a.offset - b.offset; });
+    var out = '', pos = 0;
+    ms.forEach(function (m) {
+      if (m.offset < pos || m.offset > text.length) return; // skip overlaps
+      out += esc(text.slice(pos, m.offset));
+      var seg = text.slice(m.offset, m.offset + m.length);
+      var tip = m.message || m.short || '';
+      if (m.suggestions && m.suggestions.length) tip += '  →  ' + m.suggestions.join(', ');
+      out += '<mark class="mk mk-' + m.type + '" title="' + escAttr(tip) + '">' + esc(seg) + '</mark>';
+      pos = m.offset + m.length;
+    });
+    return out + esc(text.slice(pos));
+  }
+
+  // A compact correction list under each task (works on touch, where the
+  // hover tooltips don't).
+  function renderIssues(text, matches) {
+    if (!matches || !matches.length) return '';
+    var rows = matches.slice().sort(function (a, b) { return a.offset - b.offset; })
+      .map(function (m) {
+        var seg = text.slice(m.offset, m.offset + m.length).trim();
+        var sug = m.suggestions && m.suggestions.length
+          ? ' <span class="arrow">→</span> <b>' + esc(m.suggestions.join(', ')) + '</b>' : '';
+        return '<li><i class="sw sw-' + m.type + '"></i>' +
+          '<span class="q">“' + esc(seg || '…') + '”</span>' + sug +
+          '<span class="msg">' + esc(m.short || m.message) + '</span></li>';
+      }).join('');
+    return '<ul class="issue-list">' + rows + '</ul>';
+  }
+
+  function summaryHTML(all) {
+    if (!all.length) return '<b>No mistakes found.</b>';
+    var c = {};
+    all.forEach(function (m) { c[m.type] = (c[m.type] || 0) + 1; });
+    var chips = ['spelling', 'grammar', 'punctuation', 'style']
+      .filter(function (t) { return c[t]; })
+      .map(function (t) {
+        return '<span class="chip chip-' + t + '">' + c[t] + ' ' + TYPE_LABEL[t] + '</span>';
+      }).join(' ');
+    return '<b>' + all.length + ' issue' + (all.length === 1 ? '' : 's') + '</b> ' + chips;
+  }
+
+  function checkOne(text, language) {
+    if (!text || !text.trim()) return Promise.resolve({ matches: [] });
+    return fetch('/api/check?key=' + encodeURIComponent(KEY), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: text, language: language }),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { return d.error ? { error: d.error, matches: [] } : d; })
+      .catch(function () { return { error: 'no connection', matches: [] }; });
+  }
+
+  function runCheck(s) {
+    var langSel = el('langSel');
+    var lang = langSel ? langSel.value : 'en-US';
+    var summary = el('checkSummary');
+    if (!summary) return;
+    summary.innerHTML = 'Checking writing…';
+    summary.className = 'check-summary';
+
+    Promise.all([checkOne(s.task1Text, lang), checkOne(s.task2Text, lang)])
+      .then(function (res) {
+        if (!el('essay1')) return; // modal was closed meanwhile
+        var err = (res[0] && res[0].error) || (res[1] && res[1].error);
+        if (err) {
+          summary.innerHTML = 'Couldn’t check the writing (' + esc(err) + '). The essay is shown unmarked.';
+          summary.className = 'check-summary bad';
+          el('essay1').innerHTML = plain(s.task1Text);
+          el('essay2').innerHTML = plain(s.task2Text);
+          el('issues1').innerHTML = '';
+          el('issues2').innerHTML = '';
+          return;
+        }
+        el('essay1').innerHTML = renderMarked(s.task1Text, res[0].matches);
+        el('essay2').innerHTML = renderMarked(s.task2Text, res[1].matches);
+        el('issues1').innerHTML = renderIssues(s.task1Text, res[0].matches);
+        el('issues2').innerHTML = renderIssues(s.task2Text, res[1].matches);
+        summary.innerHTML = summaryHTML((res[0].matches || []).concat(res[1].matches || []));
+        summary.className = 'check-summary';
+      });
+  }
+
   function openEssay(s) {
     if (!s) return;
     var root = el('modalRoot');
@@ -195,19 +295,45 @@
       '<p class="muted">' + (s.status === 'cheated'
         ? '⚠️ Ended early — ' + esc(s.reason || 'left the test')
         : '✅ Completed') + ' &middot; ' + esc(when(s.endedAt)) + '</p>' +
+
+      '<div class="check-bar">' +
+        '<span id="checkSummary" class="check-summary">Checking writing…</span>' +
+        '<span class="spacer"></span>' +
+        '<select id="langSel" class="mini-select">' +
+          '<option value="en-US">American spelling</option>' +
+          '<option value="en-GB">British spelling</option>' +
+        '</select>' +
+        '<button class="btn-ghost" id="recheckBtn">Re-check</button>' +
+      '</div>' +
+      '<div class="mark-legend">' +
+        '<span><i class="sw sw-spelling"></i>Spelling</span>' +
+        '<span><i class="sw sw-grammar"></i>Grammar</span>' +
+        '<span><i class="sw sw-punctuation"></i>Punctuation</span>' +
+        '<span><i class="sw sw-style"></i>Style</span>' +
+      '</div>' +
+
       '<h3>Task 1 <span class="muted">(' + s.task1Words + ' words)</span></h3>' +
-      '<pre>' + esc(s.task1Text || '(empty)') + '</pre>' +
+      '<div class="essay-marked" id="essay1"></div>' +
+      '<div id="issues1"></div>' +
       '<h3>Task 2 <span class="muted">(' + s.task2Words + ' words)</span></h3>' +
-      '<pre>' + esc(s.task2Text || '(empty)') + '</pre>' +
-      '<div style="display:flex;gap:0.6rem;justify-content:flex-end">' +
+      '<div class="essay-marked" id="essay2"></div>' +
+      '<div id="issues2"></div>' +
+
+      '<div class="modal-actions">' +
       '<button class="btn-ghost" id="copyEssay">Copy both</button>' +
       '<button class="btn-primary" id="closeModal">Close</button></div>' +
       '</div></div>';
+
+    // Show the essay immediately; the marks appear when the check returns.
+    el('essay1').innerHTML = plain(s.task1Text);
+    el('essay2').innerHTML = plain(s.task2Text);
 
     el('closeModal').addEventListener('click', closeModal);
     el('modalBack').addEventListener('click', function (e) {
       if (e.target.id === 'modalBack') closeModal();
     });
+    el('recheckBtn').addEventListener('click', function () { runCheck(s); });
+    el('langSel').addEventListener('change', function () { runCheck(s); });
     el('copyEssay').addEventListener('click', function () {
       var text = 'Name: ' + s.firstName + ' ' + s.lastName + '\n\n' +
         '--- TASK 1 (' + s.task1Words + ' words) ---\n' + (s.task1Text || '(empty)') +
@@ -215,6 +341,8 @@
       if (navigator.clipboard) navigator.clipboard.writeText(text);
       el('copyEssay').textContent = 'Copied ✓';
     });
+
+    runCheck(s);
   }
   function closeModal() { el('modalRoot').innerHTML = ''; }
 

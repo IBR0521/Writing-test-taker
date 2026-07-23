@@ -67,6 +67,22 @@ With no Supabase env vars set, it uses a local `data/` folder so you can test ev
 
 ---
 
+## Marking students' writing
+
+Students write with **no help at all** — spellcheck, autocorrect, autocapitalise and Grammarly are all switched off on the exam page, so nothing underlines or "fixes" their mistakes while they write.
+
+The teacher gets the opposite. Open **View essays** on any student and their writing is shown **marked up like a red pen**:
+
+- **Spelling** (red), **grammar** (gold), **punctuation** (blue) and **style** (grey) mistakes are underlined in the essay.
+- A count at the top, e.g. *"18 issues — 14 spelling, 4 grammar"*.
+- A correction list under each task: the exact words, the suggested fix, and why.
+- A toggle for **American / British spelling**, plus **Re-check**.
+
+Checking is done by the free [LanguageTool](https://languagetool.org) API through `/api/check`, which is **teacher-key gated** — students can never call it. Two things to know:
+
+- **The essay text is sent to languagetool.org** to be checked. If that's not acceptable for your students' data, either remove the feature or [self-host LanguageTool](https://dev.languagetool.org/http-server) and point `LT_ENDPOINT` in `lib/handlers.js` at your own server.
+- The free API is rate-limited (roughly 20 requests/minute). Checking a whole class very quickly may briefly fail — the essay is then shown unmarked with a notice, and **Re-check** retries.
+
 ## Notes & limits
 
 - **A website cannot lock the whole laptop.** It can't block `Cmd/Alt+Tab`, `Cmd+Q`, or closing the browser — only native "kiosk" software can. So instead this **detects the moment a student leaves and ends the test**, flagging it to the teacher. That's the honest, browser-achievable version of lockdown.

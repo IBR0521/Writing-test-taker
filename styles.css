@@ -617,3 +617,68 @@ table.results tbody tr:hover { background: var(--paper-2); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
 }
+
+/* ---------------------------------------------------------------------------
+   Teacher only: the marked-up essay (red-pen marking).
+   Students never load any of this — their page has spellcheck fully off.
+   --------------------------------------------------------------------------- */
+
+.check-bar {
+  display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+  margin: 1rem 0 0.5rem; padding: 0.6rem 0.8rem;
+  background: var(--paper-2); border: 1px solid var(--rule); border-radius: 10px;
+}
+.check-bar .spacer { flex: 1; min-width: 0; }
+.check-summary { font-size: 0.9rem; color: var(--text); }
+.check-summary.bad { color: var(--red-2); }
+
+.mini-select {
+  font: inherit; font-size: 0.85rem; padding: 0.32rem 0.5rem;
+  border: 1px solid var(--rule-strong); border-radius: 8px;
+  background: var(--paper); color: var(--text);
+}
+
+.chip {
+  display: inline-block; font-family: var(--font-mono); font-size: 0.72rem;
+  font-weight: 600; padding: 0.14rem 0.45rem; border-radius: 999px; margin-left: 0.25rem;
+}
+.chip-spelling { background: var(--red-soft); color: var(--red-2); }
+.chip-grammar { background: #f7eeda; color: #7a5c17; }
+.chip-punctuation { background: var(--brand-tint); color: var(--brand-2); }
+.chip-style { background: var(--paper-3); color: var(--muted); }
+
+.mark-legend {
+  display: flex; gap: 0.9rem; flex-wrap: wrap;
+  font-size: 0.78rem; color: var(--muted); margin-bottom: 0.5rem;
+}
+.mark-legend span { display: inline-flex; align-items: center; gap: 0.32rem; }
+.sw { width: 0.85rem; height: 0.2rem; border-radius: 2px; display: inline-block; flex-shrink: 0; }
+.sw-spelling { background: var(--red); }
+.sw-grammar { background: var(--gold); }
+.sw-punctuation { background: var(--brand); }
+.sw-style { background: var(--muted-2); }
+
+.essay-marked {
+  white-space: pre-wrap; overflow-wrap: break-word;
+  background: var(--paper-2); border: 1px solid var(--rule); border-radius: 10px;
+  padding: 0.95rem 1.05rem; line-height: 1.85; font-size: 0.97rem;
+  margin: 0.3rem 0 0.5rem;
+}
+mark.mk { background: transparent; color: inherit; padding: 0 1px; cursor: help; }
+mark.mk-spelling { background: var(--red-soft); border-bottom: 2px solid var(--red); }
+mark.mk-grammar { background: #f9f0dc; border-bottom: 2px solid var(--gold); }
+mark.mk-punctuation { background: var(--brand-tint); border-bottom: 2px solid var(--brand); }
+mark.mk-style { border-bottom: 2px dotted var(--muted-2); }
+
+.issue-list { list-style: none; margin: 0 0 1rem; padding: 0; font-size: 0.86rem; }
+.issue-list li {
+  display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;
+  padding: 0.42rem 0; border-bottom: 1px dashed var(--rule);
+}
+.issue-list li:last-child { border-bottom: none; }
+.issue-list .q { font-family: var(--font-mono); color: var(--red-2); }
+.issue-list .arrow { color: var(--muted-2); }
+.issue-list b { color: var(--green); }
+.issue-list .msg { color: var(--muted); flex-basis: 100%; }
+
+.modal-actions { display: flex; gap: 0.6rem; justify-content: flex-end; margin-top: 1.1rem; }
