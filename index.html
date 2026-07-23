@@ -3,96 +3,121 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Writing Test</title>
+  <title>Writing Exam</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
 
   <!-- 1. LANDING -->
-  <section id="screen-landing" class="center-wrap">
-    <div class="card">
-      <h1>✍️ Writing Test</h1>
-      <p class="sub">Enter your full name to begin. Task&nbsp;1 lasts 20&nbsp;minutes and Task&nbsp;2 lasts 40&nbsp;minutes.</p>
+  <section id="screen-landing" class="cover">
+    <div class="cover-inner">
+      <article class="exam-card">
+        <p class="eyebrow">Monitored writing exam</p>
+        <h1 class="display">The Writing Exam</h1>
+        <p class="lede">Two tasks, sixty minutes. Once you begin, the room is sealed — leave the page and your exam ends on its own.</p>
 
-      <div class="field">
-        <label for="firstName">First name</label>
-        <input id="firstName" type="text" autocomplete="off" placeholder="e.g. Aziz" />
-      </div>
-      <div class="field">
-        <label for="lastName">Surname</label>
-        <input id="lastName" type="text" autocomplete="off" placeholder="e.g. Karimov" />
-      </div>
+        <div class="paper-meta">
+          <div><span class="pm-k">Task 1</span><span class="pm-v">20:00</span></div>
+          <div class="pm-sep"></div>
+          <div><span class="pm-k">Task 2</span><span class="pm-v">40:00</span></div>
+          <div class="pm-sep"></div>
+          <div><span class="pm-k">Total</span><span class="pm-v">60:00</span></div>
+        </div>
 
-      <div class="rules">
-        <strong>⚠️ Read before you start — this is a monitored test</strong>
-        <ul>
-          <li>The test opens in <strong>fullscreen</strong>.</li>
-          <li>If you <strong>switch tabs, open another window, leave fullscreen, or click away</strong>, the test <strong>ends immediately</strong> and your teacher is told you left the test.</li>
-          <li>Copy and paste are disabled while you write.</li>
-          <li>When the timer hits zero the test moves on by itself.</li>
-        </ul>
-      </div>
+        <div class="fields">
+          <div class="field">
+            <label for="firstName">First name</label>
+            <input id="firstName" type="text" autocomplete="off" placeholder="Aziz" />
+          </div>
+          <div class="field">
+            <label for="lastName">Surname</label>
+            <input id="lastName" type="text" autocomplete="off" placeholder="Karimov" />
+          </div>
+        </div>
 
-      <button id="startBtn" class="btn-primary big-start" disabled>Start Writing</button>
-      <p id="startHint" class="sub" style="margin:0.75rem 0 0;font-size:0.85rem;text-align:center">Enter your first and last name to enable the button.</p>
+        <div class="conditions">
+          <p class="conditions-title">Exam conditions</p>
+          <ul>
+            <li>The exam opens in fullscreen.</li>
+            <li>Switching tabs, leaving fullscreen, or clicking away ends the exam at once — your teacher is told.</li>
+            <li>Copy and paste are turned off while you write.</li>
+            <li>When a timer reaches zero, the exam moves on by itself.</li>
+          </ul>
+        </div>
+
+        <button id="startBtn" class="btn-primary big-start" disabled>Start the exam</button>
+        <p id="startHint" class="hint-line">Enter your first and last name to begin.</p>
+      </article>
     </div>
   </section>
 
   <!-- 2. EXAM -->
-  <section id="screen-exam" class="hidden">
-    <div class="exam-header">
-      <span id="taskBadge" class="task-badge">Task 1</span>
-      <span id="whoLabel" class="who"></span>
-      <span class="spacer"></span>
-      <span id="timer" class="timer">20:00</span>
-    </div>
+  <section id="screen-exam" class="exam hidden">
+    <div class="timebar"><span id="timebarFill" class="timebar-fill"></span></div>
+
+    <header class="exam-bar">
+      <div class="exam-bar-left">
+        <span id="taskBadge" class="task-tag">Task 1</span>
+        <span id="whoLabel" class="candidate"></span>
+      </div>
+      <div class="exam-bar-right">
+        <span class="timer-label">Time left</span>
+        <span id="timer" class="timer">20:00</span>
+      </div>
+    </header>
 
     <div class="split">
-      <div class="pane prompt">
-        <h2 id="promptHeading">Your task</h2>
+      <section class="pane prompt">
+        <p class="eyebrow gold">Question paper</p>
+        <h2 id="promptHeading" class="display">Task 1</h2>
         <div id="promptText" class="prompt-text"></div>
         <img id="promptImg" class="prompt-img hidden" alt="Task figure" />
-      </div>
-      <div class="pane answer">
-        <textarea id="answer" placeholder="Write your answer here…" spellcheck="false"></textarea>
-      </div>
+      </section>
+      <section class="pane answer">
+        <textarea id="answer" placeholder="Begin writing here…" spellcheck="false"></textarea>
+      </section>
     </div>
 
-    <div class="exam-footer">
+    <footer class="exam-foot">
       <span id="wordcount" class="wordcount">0 words</span>
       <span class="spacer"></span>
-      <button id="nextBtn" class="btn-primary">Submit Task 1 &amp; Continue →</button>
-      <button id="finishBtn" class="btn-ok hidden">Finish Test</button>
-    </div>
+      <button id="nextBtn" class="btn-primary">Submit Task 1 &amp; continue</button>
+      <button id="finishBtn" class="btn-ok hidden">Finish exam</button>
+    </footer>
   </section>
 
   <!-- 3. FINISHED -->
-  <section id="screen-finished" class="center-wrap">
-    <div class="card" style="max-width:720px">
-      <div id="resultBanner" class="result-banner ok">
-        <span class="emoji">✅</span>
-        <span id="resultText">Test completed.</span>
-      </div>
+  <section id="screen-finished" class="cover hidden">
+    <div class="cover-inner">
+      <article class="exam-card wide">
+        <div id="resultBanner" class="result-banner ok">
+          <span class="emoji">✅</span>
+          <div><span id="resultText">Exam complete.</span></div>
+        </div>
 
-      <p class="sub" style="margin-top:-0.5rem">Copy your answers below and send them to your teacher on Telegram.</p>
+        <p class="lede small">Copy your answers below and send them to your teacher on Telegram.</p>
 
-      <div class="essay-block">
-        <div class="head"><h3>Task 1</h3><span id="wc1" class="wc"></span></div>
-        <textarea id="final1" readonly></textarea>
-        <div class="actions-row"><button class="btn-ghost" data-copy="final1">Copy Task 1</button></div>
-      </div>
+        <div class="essay-block">
+          <div class="head"><p class="eyebrow gold">Task 1</p><span id="wc1" class="wc"></span></div>
+          <textarea id="final1" class="paper-lines" readonly></textarea>
+          <div class="actions-row"><button class="btn-ghost" data-copy="final1">Copy Task 1</button></div>
+        </div>
 
-      <div class="essay-block">
-        <div class="head"><h3>Task 2</h3><span id="wc2" class="wc"></span></div>
-        <textarea id="final2" readonly></textarea>
-        <div class="actions-row"><button class="btn-ghost" data-copy="final2">Copy Task 2</button></div>
-      </div>
+        <div class="essay-block">
+          <div class="head"><p class="eyebrow gold">Task 2</p><span id="wc2" class="wc"></span></div>
+          <textarea id="final2" class="paper-lines" readonly></textarea>
+          <div class="actions-row"><button class="btn-ghost" data-copy="final2">Copy Task 2</button></div>
+        </div>
 
-      <div class="actions-row">
-        <button id="copyAllBtn" class="btn-primary">📋 Copy everything for Telegram</button>
-        <button id="resendBtn" class="btn-ghost hidden">Resend to teacher</button>
-      </div>
-      <p id="submitStatus" class="submit-status"></p>
+        <div class="actions-row">
+          <button id="copyAllBtn" class="btn-primary">Copy everything for Telegram</button>
+          <button id="resendBtn" class="btn-ghost hidden">Resend to teacher</button>
+        </div>
+        <p id="submitStatus" class="submit-status"></p>
+      </article>
     </div>
   </section>
 

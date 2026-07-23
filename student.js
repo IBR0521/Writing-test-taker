@@ -172,7 +172,14 @@
 
   function renderTimer() {
     timerEl.textContent = fmt(remaining);
-    timerEl.classList.toggle('low', remaining <= 60);
+    var low = remaining <= 60;
+    timerEl.classList.toggle('low', low);
+    var total = phase === 'task1' ? TASK1_SECONDS : TASK2_SECONDS;
+    var fill = document.getElementById('timebarFill');
+    if (fill) {
+      fill.style.width = Math.max(0, Math.min(100, (remaining / total) * 100)) + '%';
+      fill.classList.toggle('low', low);
+    }
   }
 
   function saveCurrentAnswer() {
@@ -300,12 +307,12 @@
     if (cheated) {
       banner.className = 'result-banner bad';
       banner.querySelector('.emoji').textContent = '⚠️';
-      text.innerHTML = '<strong>Test ended automatically — you left the test.</strong><br>' +
+      text.innerHTML = '<strong>Exam ended — you left the page.</strong><br>' +
         'Reason: ' + reason + '. Your teacher has been told.';
     } else {
       banner.className = 'result-banner ok';
       banner.querySelector('.emoji').textContent = '✅';
-      text.innerHTML = '<strong>Test completed.</strong> Well done!';
+      text.innerHTML = '<strong>Exam complete.</strong> Well done!';
     }
 
     var w1 = countWords(answers.task1);
@@ -387,9 +394,9 @@
   el('copyAllBtn').addEventListener('click', function () {
     var p = lastPayload || {};
     var block =
-      'Writing Test — Submission\n' +
+      'Writing Exam — Submission\n' +
       'Name: ' + student.firstName + ' ' + student.lastName + '\n' +
-      'Status: ' + (p.status === 'cheated' ? 'ENDED EARLY (left the test)' : 'Completed') + '\n' +
+      'Status: ' + (p.status === 'cheated' ? 'ENDED EARLY (left the page)' : 'Completed') + '\n' +
       '\n--- TASK 1 (' + countWords(answers.task1) + ' words) ---\n' +
       (answers.task1 || '(empty)') +
       '\n\n--- TASK 2 (' + countWords(answers.task2) + ' words) ---\n' +
