@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Writing Test</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+
+  <!-- 1. LANDING -->
+  <section id="screen-landing" class="center-wrap">
+    <div class="card">
+      <h1>✍️ Writing Test</h1>
+      <p class="sub">Enter your full name to begin. Task&nbsp;1 lasts 20&nbsp;minutes and Task&nbsp;2 lasts 40&nbsp;minutes.</p>
+
+      <div class="field">
+        <label for="firstName">First name</label>
+        <input id="firstName" type="text" autocomplete="off" placeholder="e.g. Aziz" />
+      </div>
+      <div class="field">
+        <label for="lastName">Surname</label>
+        <input id="lastName" type="text" autocomplete="off" placeholder="e.g. Karimov" />
+      </div>
+
+      <div class="rules">
+        <strong>⚠️ Read before you start — this is a monitored test</strong>
+        <ul>
+          <li>The test opens in <strong>fullscreen</strong>.</li>
+          <li>If you <strong>switch tabs, open another window, leave fullscreen, or click away</strong>, the test <strong>ends immediately</strong> and your teacher is told you left the test.</li>
+          <li>Copy and paste are disabled while you write.</li>
+          <li>When the timer hits zero the test moves on by itself.</li>
+        </ul>
+      </div>
+
+      <button id="startBtn" class="btn-primary big-start" disabled>Start Writing</button>
+      <p id="startHint" class="sub" style="margin:0.75rem 0 0;font-size:0.85rem;text-align:center">Enter your first and last name to enable the button.</p>
+    </div>
+  </section>
+
+  <!-- 2. EXAM -->
+  <section id="screen-exam" class="hidden">
+    <div class="exam-header">
+      <span id="taskBadge" class="task-badge">Task 1</span>
+      <span id="whoLabel" class="who"></span>
+      <span class="spacer"></span>
+      <span id="timer" class="timer">20:00</span>
+    </div>
+
+    <div class="split">
+      <div class="pane prompt">
+        <h2 id="promptHeading">Your task</h2>
+        <div id="promptText" class="prompt-text"></div>
+        <img id="promptImg" class="prompt-img hidden" alt="Task figure" />
+      </div>
+      <div class="pane answer">
+        <textarea id="answer" placeholder="Write your answer here…" spellcheck="false"></textarea>
+      </div>
+    </div>
+
+    <div class="exam-footer">
+      <span id="wordcount" class="wordcount">0 words</span>
+      <span class="spacer"></span>
+      <button id="nextBtn" class="btn-primary">Submit Task 1 &amp; Continue →</button>
+      <button id="finishBtn" class="btn-ok hidden">Finish Test</button>
+    </div>
+  </section>
+
+  <!-- 3. FINISHED -->
+  <section id="screen-finished" class="center-wrap">
+    <div class="card" style="max-width:720px">
+      <div id="resultBanner" class="result-banner ok">
+        <span class="emoji">✅</span>
+        <span id="resultText">Test completed.</span>
+      </div>
+
+      <p class="sub" style="margin-top:-0.5rem">Copy your answers below and send them to your teacher on Telegram.</p>
+
+      <div class="essay-block">
+        <div class="head"><h3>Task 1</h3><span id="wc1" class="wc"></span></div>
+        <textarea id="final1" readonly></textarea>
+        <div class="actions-row"><button class="btn-ghost" data-copy="final1">Copy Task 1</button></div>
+      </div>
+
+      <div class="essay-block">
+        <div class="head"><h3>Task 2</h3><span id="wc2" class="wc"></span></div>
+        <textarea id="final2" readonly></textarea>
+        <div class="actions-row"><button class="btn-ghost" data-copy="final2">Copy Task 2</button></div>
+      </div>
+
+      <div class="actions-row">
+        <button id="copyAllBtn" class="btn-primary">📋 Copy everything for Telegram</button>
+        <button id="resendBtn" class="btn-ghost hidden">Resend to teacher</button>
+      </div>
+      <p id="submitStatus" class="submit-status"></p>
+    </div>
+  </section>
+
+  <script src="/student.js"></script>
+</body>
+</html>

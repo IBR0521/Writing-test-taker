@@ -1,0 +1,13 @@
+# Secrets — never commit these
+.env
+.env.local
+.env.*.local
+
+# Local-dev storage (production uses Supabase)
+data/
+
+# Vercel / tooling
+.vercel/
+node_modules/
+*.log
+.DS_Store
