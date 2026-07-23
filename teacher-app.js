@@ -152,12 +152,12 @@
         ? esc(s.reason || 'Left the test') + ' <span class="muted">(during ' + esc(prettyPhase(s.phaseWhenEnded)) + ')</span>'
         : '<span class="muted">—</span>';
       return '<tr>' +
-        '<td><b>' + esc(s.lastName) + ', ' + esc(s.firstName) + '</b></td>' +
-        '<td>' + badge + '</td>' +
-        '<td>' + reason + '</td>' +
-        '<td>' + s.task1Words + ' / ' + s.task2Words + '</td>' +
-        '<td class="muted">' + esc(when(s.endedAt)) + '</td>' +
-        '<td><button class="link-btn" data-view="' + i + '">View essays</button></td>' +
+        '<td data-label="Student"><b>' + esc(s.lastName) + ', ' + esc(s.firstName) + '</b></td>' +
+        '<td data-label="Status">' + badge + '</td>' +
+        '<td data-label="Note">' + reason + '</td>' +
+        '<td data-label="Words T1/T2">' + s.task1Words + ' / ' + s.task2Words + '</td>' +
+        '<td data-label="Finished" class="muted">' + esc(when(s.endedAt)) + '</td>' +
+        '<td data-label="" class="cell-action"><button class="link-btn" data-view="' + i + '">View essays</button></td>' +
         '</tr>';
     }).join('');
 

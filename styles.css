@@ -242,7 +242,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .img-preview img { max-width: 100%; border-radius: 8px; border: 1px solid var(--line); }
 .img-preview .remove { margin-top: 0.4rem; }
 
-.save-row { display: flex; align-items: center; gap: 1rem; margin-top: 1.25rem; }
+.save-row { display: flex; align-items: center; gap: 1rem; margin-top: 1.25rem; flex-wrap: wrap; }
 .save-row .status { font-size: 0.92rem; }
 .save-row .status.ok { color: var(--ok); }
 .save-row .status.bad { color: var(--bad); }
@@ -258,8 +258,8 @@ table.results th { color: var(--muted); font-weight: 600; font-size: 0.82rem; te
 .badge.bad { background: var(--bad-soft); color: #7f1d1d; }
 .link-btn { background: none; color: var(--brand); padding: 0; font-size: 0.88rem; font-weight: 600; }
 .link-btn:hover { text-decoration: underline; }
-.results-toolbar { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.9rem; }
-.results-toolbar .spacer { flex: 1; }
+.results-toolbar { display: flex; align-items: center; gap: 0.5rem 0.75rem; margin-bottom: 0.9rem; flex-wrap: wrap; }
+.results-toolbar .spacer { flex: 1; min-width: 0; }
 .muted { color: var(--muted); }
 .empty { color: var(--muted); padding: 1.5rem 0; text-align: center; }
 
@@ -282,4 +282,60 @@ table.results th { color: var(--muted); font-weight: 600; font-size: 0.82rem; te
   .split { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
   .pane.prompt { border-right: none; border-bottom: 3px solid var(--line); }
   .task-grid { grid-template-columns: 1fr; }
+}
+
+/* ---------- Teacher page on phones ---------- */
+@media (max-width: 640px) {
+  .teacher-wrap { padding: 1.25rem 0.9rem 3rem; }
+  .teacher-wrap h1 { font-size: 1.5rem; }
+  .panel { padding: 1.1rem; border-radius: 14px; }
+  .panel > h2 { font-size: 1.1rem; }
+  .save-row .btn-primary { width: 100%; }
+
+  .results-toolbar h2 { flex-basis: 100%; }
+  .results-toolbar .spacer { display: none; }
+  .results-toolbar .btn-ghost,
+  .results-toolbar .btn-danger { flex: 1; }
+  #autoNote { flex-basis: 100%; }
+
+  /* Turn the results table into stacked cards, one per student. */
+  table.results thead { display: none; }
+  table.results,
+  table.results tbody,
+  table.results tr,
+  table.results td { display: block; width: 100%; }
+  table.results tr {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 0.25rem 0.9rem;
+    margin-bottom: 0.85rem;
+    background: #fff;
+  }
+  table.results td {
+    border-bottom: 1px solid var(--line);
+    padding: 0.6rem 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    text-align: right;
+  }
+  table.results td:last-child { border-bottom: none; }
+  table.results td::before {
+    content: attr(data-label);
+    text-align: left;
+    font-weight: 600;
+    color: var(--muted);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    flex-shrink: 0;
+  }
+  table.results td.cell-action { justify-content: center; text-align: center; }
+  table.results td.cell-action::before { display: none; }
+  .link-btn { font-size: 1rem; padding: 0.25rem 0; }
+
+  /* Modal fits small screens */
+  .modal-back { padding: 0.75rem; }
+  .modal { padding: 1.2rem; max-height: 90vh; }
 }
