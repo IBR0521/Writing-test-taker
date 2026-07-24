@@ -78,10 +78,15 @@ The marking only appears afterwards, and both sides can see it:
 
 Either way the writing is shown **marked up like a red pen**:
 
+- An **estimated IELTS band** at the top — an overall Writing band plus a breakdown of the four criteria (Task Response, Coherence & Cohesion, Lexical Resource, Grammar) and each task's band (Task 2 counts double, as in real IELTS).
 - **Spelling** (red), **grammar** (gold), **punctuation** (blue) and **style** (grey) mistakes are underlined in the essay.
 - A count at the top, e.g. *"18 issues — 14 spelling, 4 grammar"*.
 - A correction list under each task: the exact words, the suggested fix, and why.
 - A toggle for **American / British spelling**, plus **Re-check**.
+
+### About the estimated band
+
+The band is a **free, offline estimate** computed in [`lib/score.js`](lib/score.js) — no AI service, no API key, no cost. It has **no understanding of meaning**: it can't tell whether the essay actually answered the question, which is what a real examiner judges most. Instead it estimates each criterion from signals it *can* measure — length vs. the task minimum, grammar/spelling error density (reused from the LanguageTool check), vocabulary range, sentence variety and linking words. Treat it as a rough guide for students, **not an official score**; that's why the card says so. To make it smarter (real task-response judgement) you'd swap in an AI grader, which needs an API key and would send essays to that provider.
 
 Checking is done by the free [LanguageTool](https://languagetool.org) API through `/api/check`. It is **not key-gated**, because students need it to review their own work after they submit — there's no way to use it during the exam, since the exam page has no checker and paste is blocked. Two things to know:
 

@@ -676,6 +676,52 @@ table.results tbody tr:hover { background: var(--paper-2); }
    ever appear once the writing is finished.
    --------------------------------------------------------------------------- */
 
+/* estimated IELTS band card (both teacher & student) */
+.score-card {
+  display: flex; gap: 1rem; align-items: stretch;
+  margin: 1rem 0 0.4rem; padding: 0.9rem 1rem;
+  background: var(--paper-2); border: 1px solid var(--rule); border-radius: 12px;
+}
+.score-card.empty, .score-card.loading {
+  display: block; color: var(--muted); font-size: 0.9rem;
+}
+.score-overall {
+  flex: none; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 0.6rem 1rem; min-width: 6.4rem; border-radius: 10px;
+  background: var(--brand-tint); color: var(--brand-2);
+}
+.score-overall.good { background: var(--green-soft); color: #12492f; }
+.score-overall.mid  { background: #f7eeda; color: #7a5c17; }
+.score-overall.low  { background: var(--red-soft); color: var(--red-2); }
+.score-band { font-family: var(--font-display); font-size: 2.5rem; font-weight: 600; line-height: 1; }
+.score-cap {
+  font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.1em;
+  text-align: center; margin-top: 0.35rem; opacity: 0.85;
+}
+.score-detail { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+.score-rows { display: grid; gap: 0.4rem; }
+.score-row {
+  display: grid; grid-template-columns: 9rem 1fr 2.2rem;
+  align-items: center; gap: 0.55rem; font-size: 0.82rem;
+}
+.score-k { color: var(--muted); }
+.score-track { height: 6px; background: var(--paper-3); border-radius: 3px; overflow: hidden; }
+.score-bar { display: block; height: 100%; border-radius: 3px; background: var(--brand); }
+.score-bar.good { background: var(--green); }
+.score-bar.mid  { background: var(--gold); }
+.score-bar.low  { background: var(--red); }
+.score-v { text-align: right; font-family: var(--font-mono); color: var(--text); }
+.score-tasks { margin: 0.6rem 0 0; font-size: 0.8rem; color: var(--text); }
+.score-tasks b { font-family: var(--font-mono); }
+.score-note { margin: 0.32rem 0 0; font-size: 0.74rem; color: var(--muted-2); line-height: 1.45; }
+@media (max-width: 560px) {
+  .score-card { flex-direction: column; gap: 0.7rem; }
+  .score-overall { flex-direction: row; gap: 0.6rem; min-width: 0; }
+  .score-cap { margin-top: 0; text-align: left; }
+  .score-row { grid-template-columns: 7.5rem 1fr 2rem; }
+}
+
 .check-bar {
   display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
   margin: 1rem 0 0.5rem; padding: 0.6rem 0.8rem;

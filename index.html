@@ -120,6 +120,7 @@
           </div>
 
           <div id="analyzeResults" class="hidden">
+            <div id="scoreRoot"></div>
             <div class="check-bar">
               <span id="checkSummary" class="check-summary"></span>
               <span class="spacer"></span>
@@ -154,7 +155,16 @@
     </div>
   </section>
 
-  <!-- One-time tip, shown to a student the first time they open the exam. -->
+  <!-- One-time announcement toasts, shown once each on a student's first visit. -->
+  <div id="scoreTip" class="tip-toast hidden" role="status" aria-live="polite">
+    <span class="tip-ico" aria-hidden="true">🙈</span>
+    <div class="tip-body">
+      <p class="tip-title">Sorry, me again</p>
+      <p class="tip-text">Another update! <b>Analyze my writing</b> now also shows your <b>approximate IELTS score</b> — so you can see roughly where you stand. It grades gently, promise.</p>
+    </div>
+    <button id="scoreTipDismiss" class="tip-close" aria-label="Dismiss tip">Nice</button>
+  </div>
+
   <div id="analyzeTip" class="tip-toast hidden" role="status" aria-live="polite">
     <span class="tip-ico" aria-hidden="true">✍️</span>
     <div class="tip-body">

@@ -469,16 +469,65 @@
     return '<b>' + all.length + ' issue' + (all.length === 1 ? '' : 's') + '</b> ' + chips;
   }
 
-  function checkOne(text, language) {
-    if (!text || !text.trim()) return Promise.resolve({ matches: [] });
+  function checkOne(text, language, min) {
+    if (!text || !text.trim()) return Promise.resolve({ matches: [], band: emptyBand() });
     return fetch('/api/check', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: text, language: language }),
+      body: JSON.stringify({ text: text, language: language, minWords: min }),
     })
       .then(function (r) { return r.json(); })
       .then(function (d) { return d.error ? { error: d.error, matches: [] } : d; })
       .catch(function () { return { error: 'no connection', matches: [] }; });
+  }
+
+  // ---- estimated IELTS band -------------------------------------------------
+
+  function emptyBand() {
+    return { words: 0, overall: 0, empty: true,
+      criteria: { taskResponse: 0, coherence: 0, lexical: 0, grammar: 0 } };
+  }
+  function fmtBand(v) { return v ? (Math.round(v * 2) / 2).toFixed(1) : '—'; }
+  function combineWriting(a, b) {
+    // Overall Writing band: Task 2 counts double, rounded to the nearest 0.5.
+    return Math.round(((Number(a) + 2 * Number(b)) / 3) * 2) / 2;
+  }
+  function bandClass(v) {
+    if (v >= 7) return 'good';
+    if (v >= 5.5) return 'mid';
+    return 'low';
+  }
+
+  function scoreCardHTML(b1, b2) {
+    b1 = b1 || emptyBand();
+    b2 = b2 || emptyBand();
+    if (!b1.words && !b2.words) {
+      return '<div class="score-card empty">No writing to grade.</div>';
+    }
+    var c1 = b1.criteria || {}, c2 = b2.criteria || {};
+    var overall = combineWriting(b1.overall, b2.overall);
+    var crit = [
+      ['Task response', combineWriting(c1.taskResponse, c2.taskResponse)],
+      ['Coherence & cohesion', combineWriting(c1.coherence, c2.coherence)],
+      ['Lexical resource', combineWriting(c1.lexical, c2.lexical)],
+      ['Grammar', combineWriting(c1.grammar, c2.grammar)],
+    ];
+    var rows = crit.map(function (r) {
+      var pct = Math.max(0, Math.min(100, (r[1] / 9) * 100));
+      return '<div class="score-row"><span class="score-k">' + r[0] + '</span>' +
+        '<span class="score-track"><i class="score-bar ' + bandClass(r[1]) +
+        '" style="width:' + pct + '%"></i></span>' +
+        '<b class="score-v">' + fmtBand(r[1]) + '</b></div>';
+    }).join('');
+    return '<div class="score-card">' +
+      '<div class="score-overall ' + bandClass(overall) + '">' +
+      '<span class="score-band">' + fmtBand(overall) + '</span>' +
+      '<span class="score-cap">Estimated<br>IELTS band</span></div>' +
+      '<div class="score-detail"><div class="score-rows">' + rows + '</div>' +
+      '<p class="score-tasks">Task 1 <b>' + fmtBand(b1.overall) + '</b> &middot; Task 2 <b>' +
+      fmtBand(b2.overall) + '</b> <span class="muted">(Task 2 counts double)</span></p>' +
+      '<p class="score-note">An estimate from length, vocabulary range, linking words and ' +
+      'error rate — not an official examiner score.</p></div></div>';
   }
 
   function runAnalyze() {
@@ -496,10 +545,14 @@
     el('anEssay2').innerHTML = plain(t2);
     el('anIssues1').innerHTML = '';
     el('anIssues2').innerHTML = '';
+    el('scoreRoot').innerHTML = '<div class="score-card loading">Estimating your band…</div>';
     summary.textContent = 'Checking your writing…';
     summary.className = 'check-summary';
 
-    Promise.all([checkOne(t1, lang), checkOne(t2, lang)]).then(function (res) {
+    Promise.all([
+      checkOne(t1, lang, minWords.task1),
+      checkOne(t2, lang, minWords.task2),
+    ]).then(function (res) {
       var err = (res[0] && res[0].error) || (res[1] && res[1].error);
       if (err) {
         summary.innerHTML = 'Couldn’t check the writing (' + esc(err) +
@@ -507,8 +560,10 @@
         summary.className = 'check-summary bad';
         el('anEssay1').innerHTML = plain(t1);
         el('anEssay2').innerHTML = plain(t2);
+        el('scoreRoot').innerHTML = '';
         return;
       }
+      el('scoreRoot').innerHTML = scoreCardHTML(res[0].band, res[1].band);
       el('anEssay1').innerHTML = renderMarked(t1, res[0].matches);
       el('anEssay2').innerHTML = renderMarked(t2, res[1].matches);
       el('anIssues1').innerHTML = renderIssues(t1, res[0].matches);
@@ -522,43 +577,59 @@
   el('recheckBtn').addEventListener('click', runAnalyze);
   el('langSel').addEventListener('change', runAnalyze);
 
-  // ---------- one-time "analyze at the end" tip ----------
+  // ---------- one-time announcement tips ----------
   //
-  // Shown once, the first time a student opens the exam on this device, so they
-  // know the feedback exists before they start writing. Remembered in
+  // Little toasts a student sees once each, the first time they open the exam on
+  // this device. Listed newest-first; on each visit the newest one they haven't
+  // seen yet pops up (one at a time, never stacked). Each is remembered in
   // localStorage so it never nags them again.
 
-  var TIP_KEY = 'wtt-analyze-tip-seen';
+  var TIPS = [
+    { key: 'wtt-score-tip-seen', el: 'scoreTip', btn: 'scoreTipDismiss' },
+    { key: 'wtt-analyze-tip-seen', el: 'analyzeTip', btn: 'tipDismiss' },
+  ];
   var tipTimer = null;
+  var activeTip = null;
 
-  function tipSeen() {
-    try { return localStorage.getItem(TIP_KEY) === '1'; } catch (e) { return false; }
+  function tipSeen(key) {
+    try { return localStorage.getItem(key) === '1'; } catch (e) { return false; }
+  }
+  function markTipSeen(key) {
+    try { localStorage.setItem(key, '1'); } catch (e) {}
   }
 
-  function showTipOnce() {
-    if (tipSeen()) return;
-    var tip = el('analyzeTip');
-    if (!tip) return;
-    tip.classList.remove('hidden');
-    try { localStorage.setItem(TIP_KEY, '1'); } catch (e) {} // truly one-time
-    tipTimer = setTimeout(dismissTip, 9000);                 // auto-hide
+  function showNextTip() {
+    for (var i = 0; i < TIPS.length; i++) {
+      if (!tipSeen(TIPS[i].key) && el(TIPS[i].el)) { showTip(TIPS[i]); return; }
+    }
+  }
+
+  function showTip(tip) {
+    activeTip = tip;
+    el(tip.el).classList.remove('hidden');
+    markTipSeen(tip.key);                    // truly one-time
+    tipTimer = setTimeout(dismissTip, 9000); // auto-hide
   }
 
   function dismissTip() {
-    var tip = el('analyzeTip');
-    if (!tip || tip.classList.contains('hidden')) return;
     if (tipTimer) { clearTimeout(tipTimer); tipTimer = null; }
-    tip.classList.add('leaving');
+    if (!activeTip) return;
+    var box = el(activeTip.el);
+    activeTip = null;
+    if (!box || box.classList.contains('hidden')) return;
+    box.classList.add('leaving');
     setTimeout(function () {
-      tip.classList.add('hidden');
-      tip.classList.remove('leaving');
+      box.classList.add('hidden');
+      box.classList.remove('leaving');
     }, 280);
   }
 
-  var tipBtn = el('tipDismiss');
-  if (tipBtn) tipBtn.addEventListener('click', dismissTip);
+  TIPS.forEach(function (t) {
+    var b = el(t.btn);
+    if (b) b.addEventListener('click', dismissTip);
+  });
 
   // init
   validateNames();
-  showTipOnce();
+  showNextTip();
 })();

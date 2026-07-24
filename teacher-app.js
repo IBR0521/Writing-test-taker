@@ -244,16 +244,65 @@
     return '<b>' + all.length + ' issue' + (all.length === 1 ? '' : 's') + '</b> ' + chips;
   }
 
-  function checkOne(text, language) {
-    if (!text || !text.trim()) return Promise.resolve({ matches: [] });
+  function checkOne(text, language, min) {
+    if (!text || !text.trim()) return Promise.resolve({ matches: [], band: emptyBand() });
     return fetch('/api/check?key=' + encodeURIComponent(KEY), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: text, language: language }),
+      body: JSON.stringify({ text: text, language: language, minWords: min }),
     })
       .then(function (r) { return r.json(); })
       .then(function (d) { return d.error ? { error: d.error, matches: [] } : d; })
       .catch(function () { return { error: 'no connection', matches: [] }; });
+  }
+
+  // ---- estimated IELTS band -------------------------------------------------
+
+  function emptyBand() {
+    return { words: 0, overall: 0, empty: true,
+      criteria: { taskResponse: 0, coherence: 0, lexical: 0, grammar: 0 } };
+  }
+  function fmtBand(v) { return v ? (Math.round(v * 2) / 2).toFixed(1) : '—'; }
+  function combineWriting(a, b) {
+    // Overall Writing band: Task 2 counts double, rounded to the nearest 0.5.
+    return Math.round(((Number(a) + 2 * Number(b)) / 3) * 2) / 2;
+  }
+  function bandClass(v) {
+    if (v >= 7) return 'good';
+    if (v >= 5.5) return 'mid';
+    return 'low';
+  }
+
+  function scoreCardHTML(b1, b2) {
+    b1 = b1 || emptyBand();
+    b2 = b2 || emptyBand();
+    if (!b1.words && !b2.words) {
+      return '<div class="score-card empty">No writing to grade.</div>';
+    }
+    var c1 = b1.criteria || {}, c2 = b2.criteria || {};
+    var overall = combineWriting(b1.overall, b2.overall);
+    var crit = [
+      ['Task response', combineWriting(c1.taskResponse, c2.taskResponse)],
+      ['Coherence & cohesion', combineWriting(c1.coherence, c2.coherence)],
+      ['Lexical resource', combineWriting(c1.lexical, c2.lexical)],
+      ['Grammar', combineWriting(c1.grammar, c2.grammar)],
+    ];
+    var rows = crit.map(function (r) {
+      var pct = Math.max(0, Math.min(100, (r[1] / 9) * 100));
+      return '<div class="score-row"><span class="score-k">' + r[0] + '</span>' +
+        '<span class="score-track"><i class="score-bar ' + bandClass(r[1]) +
+        '" style="width:' + pct + '%"></i></span>' +
+        '<b class="score-v">' + fmtBand(r[1]) + '</b></div>';
+    }).join('');
+    return '<div class="score-card">' +
+      '<div class="score-overall ' + bandClass(overall) + '">' +
+      '<span class="score-band">' + fmtBand(overall) + '</span>' +
+      '<span class="score-cap">Estimated<br>IELTS band</span></div>' +
+      '<div class="score-detail"><div class="score-rows">' + rows + '</div>' +
+      '<p class="score-tasks">Task 1 <b>' + fmtBand(b1.overall) + '</b> &middot; Task 2 <b>' +
+      fmtBand(b2.overall) + '</b> <span class="muted">(Task 2 counts double)</span></p>' +
+      '<p class="score-note">An estimate from length, vocabulary range, linking words and ' +
+      'error rate — not an official examiner score.</p></div></div>';
   }
 
   function runCheck(s) {
@@ -263,8 +312,9 @@
     if (!summary) return;
     summary.innerHTML = 'Checking writing…';
     summary.className = 'check-summary';
+    if (el('scoreRoot')) el('scoreRoot').innerHTML = '<div class="score-card loading">Estimating band…</div>';
 
-    Promise.all([checkOne(s.task1Text, lang), checkOne(s.task2Text, lang)])
+    Promise.all([checkOne(s.task1Text, lang, 150), checkOne(s.task2Text, lang, 250)])
       .then(function (res) {
         if (!el('essay1')) return; // modal was closed meanwhile
         var err = (res[0] && res[0].error) || (res[1] && res[1].error);
@@ -275,8 +325,10 @@
           el('essay2').innerHTML = plain(s.task2Text);
           el('issues1').innerHTML = '';
           el('issues2').innerHTML = '';
+          if (el('scoreRoot')) el('scoreRoot').innerHTML = '';
           return;
         }
+        if (el('scoreRoot')) el('scoreRoot').innerHTML = scoreCardHTML(res[0].band, res[1].band);
         el('essay1').innerHTML = renderMarked(s.task1Text, res[0].matches);
         el('essay2').innerHTML = renderMarked(s.task2Text, res[1].matches);
         el('issues1').innerHTML = renderIssues(s.task1Text, res[0].matches);
@@ -295,6 +347,8 @@
       '<p class="muted">' + (s.status === 'cheated'
         ? '⚠️ Ended early — ' + esc(s.reason || 'left the test')
         : '✅ Completed') + ' &middot; ' + esc(when(s.endedAt)) + '</p>' +
+
+      '<div id="scoreRoot"></div>' +
 
       '<div class="check-bar">' +
         '<span id="checkSummary" class="check-summary">Checking writing…</span>' +
