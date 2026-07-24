@@ -155,23 +155,14 @@
     </div>
   </section>
 
-  <!-- One-time announcement toasts, shown once each on a student's first visit. -->
-  <div id="scoreTip" class="tip-toast hidden" role="status" aria-live="polite">
-    <span class="tip-ico" aria-hidden="true">🙈</span>
-    <div class="tip-body">
-      <p class="tip-title">Sorry, me again</p>
-      <p class="tip-text">Another update! <b>Analyze my writing</b> now also shows your <b>approximate IELTS score</b> — so you can see roughly where you stand. It grades gently, promise.</p>
-    </div>
-    <button id="scoreTipDismiss" class="tip-close" aria-label="Dismiss tip">Nice</button>
-  </div>
-
-  <div id="analyzeTip" class="tip-toast hidden" role="status" aria-live="polite">
+  <!-- One-time tip, shown to a student the first time they open the exam. -->
+  <div id="introTip" class="tip-toast hidden" role="status" aria-live="polite">
     <span class="tip-ico" aria-hidden="true">✍️</span>
     <div class="tip-body">
       <p class="tip-title">Good to know</p>
-      <p class="tip-text">When you finish, you can press <b>Analyze my writing</b> to see your spelling and grammar mistakes.</p>
+      <p class="tip-text">When you finish, press <b>Analyze my writing</b> to see your spelling and grammar mistakes — and, new this time, your <b>approximate IELTS score</b> too. It grades gently, promise.</p>
     </div>
-    <button id="tipDismiss" class="tip-close" aria-label="Dismiss tip">Got it</button>
+    <button id="introTipDismiss" class="tip-close" aria-label="Dismiss tip">Got it</button>
   </div>
 
   <script src="/student.js"></script>
