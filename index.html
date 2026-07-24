@@ -112,6 +112,39 @@
           <div class="actions-row"><button class="btn-ghost" data-copy="final2">Copy Task 2</button></div>
         </div>
 
+        <div class="essay-block" id="analyzeBlock">
+          <div class="head"><p class="eyebrow gold">Feedback</p></div>
+          <p class="lede small">See the spelling, grammar and punctuation mistakes in what you wrote.</p>
+          <div class="actions-row">
+            <button id="analyzeBtn" class="btn-primary">Analyze my writing</button>
+          </div>
+
+          <div id="analyzeResults" class="hidden">
+            <div class="check-bar">
+              <span id="checkSummary" class="check-summary"></span>
+              <span class="spacer"></span>
+              <select id="langSel" class="mini-select">
+                <option value="en-US">American spelling</option>
+                <option value="en-GB">British spelling</option>
+              </select>
+              <button class="btn-ghost" id="recheckBtn">Re-check</button>
+            </div>
+            <div class="mark-legend">
+              <span><i class="sw sw-spelling"></i>Spelling</span>
+              <span><i class="sw sw-grammar"></i>Grammar</span>
+              <span><i class="sw sw-punctuation"></i>Punctuation</span>
+              <span><i class="sw sw-style"></i>Style</span>
+            </div>
+
+            <h3>Task 1 <span id="anWc1" class="muted"></span></h3>
+            <div class="essay-marked" id="anEssay1"></div>
+            <div id="anIssues1"></div>
+            <h3>Task 2 <span id="anWc2" class="muted"></span></h3>
+            <div class="essay-marked" id="anEssay2"></div>
+            <div id="anIssues2"></div>
+          </div>
+        </div>
+
         <div class="actions-row">
           <button id="copyAllBtn" class="btn-primary">Copy everything for Telegram</button>
           <button id="resendBtn" class="btn-ghost hidden">Resend to teacher</button>
@@ -120,6 +153,16 @@
       </article>
     </div>
   </section>
+
+  <!-- One-time tip, shown to a student the first time they open the exam. -->
+  <div id="analyzeTip" class="tip-toast hidden" role="status" aria-live="polite">
+    <span class="tip-ico" aria-hidden="true">✍️</span>
+    <div class="tip-body">
+      <p class="tip-title">Good to know</p>
+      <p class="tip-text">When you finish, you can press <b>Analyze my writing</b> to see your spelling and grammar mistakes.</p>
+    </div>
+    <button id="tipDismiss" class="tip-close" aria-label="Dismiss tip">Got it</button>
+  </div>
 
   <script src="/student.js"></script>
 </body>

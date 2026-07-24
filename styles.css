@@ -234,6 +234,57 @@ button:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
 .big-start { width: 100%; font-size: 1.06rem; padding: 0.95rem; margin-top: 0.4rem; letter-spacing: 0.01em; }
 .hint-line { text-align: center; color: var(--muted-2); font-size: 0.85rem; margin: 0.8rem 0 0; }
 
+/* one-time "you can analyze at the end" tip (student, first visit) */
+.tip-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.4rem;
+  transform: translateX(-50%);
+  z-index: 60;
+  width: min(30rem, calc(100vw - 1.6rem));
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0.95rem 1.05rem;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--gold);
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+  animation: toast-in 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.tip-toast.leaving { animation: toast-out 0.28s ease forwards; }
+.tip-ico { font-size: 1.35rem; line-height: 1.4; flex: none; }
+.tip-body { flex: 1; min-width: 0; }
+.tip-title {
+  margin: 0 0 0.15rem;
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.12em; color: var(--gold);
+}
+.tip-text { margin: 0; font-size: 0.92rem; line-height: 1.5; color: var(--text); }
+.tip-text b { color: var(--brand); }
+.tip-close {
+  flex: none; align-self: center;
+  font: inherit; font-size: 0.85rem; font-weight: 600;
+  padding: 0.4rem 0.75rem; cursor: pointer;
+  color: var(--brand); background: var(--brand-tint);
+  border: none; border-radius: 8px;
+}
+.tip-close:hover { background: #dbe6f7; }
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translate(-50%, 18px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+@keyframes toast-out {
+  from { opacity: 1; transform: translate(-50%, 0); }
+  to { opacity: 0; transform: translate(-50%, 12px); }
+}
+
+@media (max-width: 520px) {
+  .tip-toast { bottom: 0.8rem; }
+}
+
 /* ============================================================================
    EXAM: split "question paper" + "ruled answer paper"
    ============================================================================ */
@@ -619,8 +670,10 @@ table.results tbody tr:hover { background: var(--paper-2); }
 }
 
 /* ---------------------------------------------------------------------------
-   Teacher only: the marked-up essay (red-pen marking).
-   Students never load any of this — their page has spellcheck fully off.
+   The marked-up essay (red-pen marking). Used by the teacher's "View essays"
+   modal and by the student's own "Analyze my writing" panel after the exam.
+   While writing, the exam page still has spellcheck fully off — the marks only
+   ever appear once the writing is finished.
    --------------------------------------------------------------------------- */
 
 .check-bar {

@@ -102,6 +102,7 @@
 
   function startExam() {
     startedAt = Date.now();
+    dismissTip();
     show(screenExam);
     whoLabel.textContent = student.firstName + ' ' + student.lastName;
 
@@ -404,6 +405,160 @@
     copyText(block, el('copyAllBtn'));
   });
 
+  // ---------- analyze my writing ----------
+  //
+  // After the exam, the student can press "Analyze my writing" to see the same
+  // spelling/grammar/punctuation marks the teacher gets. Uses /api/check
+  // (LanguageTool). No teacher key — the endpoint is open for this.
+
+  var TYPE_LABEL = {
+    spelling: 'spelling', grammar: 'grammar',
+    punctuation: 'punctuation', style: 'style',
+  };
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function escAttr(s) { return esc(s).replace(/"/g, '&quot;'); }
+  function plain(text) {
+    return text && text.trim() ? esc(text) : '<span class="muted">(empty)</span>';
+  }
+
+  // Rebuild the essay with each mistake wrapped in a <mark>.
+  function renderMarked(text, matches) {
+    if (!text || !text.trim()) return '<span class="muted">(empty)</span>';
+    var ms = (matches || []).slice().sort(function (a, b) { return a.offset - b.offset; });
+    var out = '', pos = 0;
+    ms.forEach(function (m) {
+      if (m.offset < pos || m.offset > text.length) return; // skip overlaps
+      out += esc(text.slice(pos, m.offset));
+      var seg = text.slice(m.offset, m.offset + m.length);
+      var tip = m.message || m.short || '';
+      if (m.suggestions && m.suggestions.length) tip += '  →  ' + m.suggestions.join(', ');
+      out += '<mark class="mk mk-' + m.type + '" title="' + escAttr(tip) + '">' + esc(seg) + '</mark>';
+      pos = m.offset + m.length;
+    });
+    return out + esc(text.slice(pos));
+  }
+
+  // A compact correction list (works on touch, where hover tooltips don't).
+  function renderIssues(text, matches) {
+    if (!matches || !matches.length) return '';
+    var rows = matches.slice().sort(function (a, b) { return a.offset - b.offset; })
+      .map(function (m) {
+        var seg = text.slice(m.offset, m.offset + m.length).trim();
+        var sug = m.suggestions && m.suggestions.length
+          ? ' <span class="arrow">→</span> <b>' + esc(m.suggestions.join(', ')) + '</b>' : '';
+        return '<li><i class="sw sw-' + m.type + '"></i>' +
+          '<span class="q">“' + esc(seg || '…') + '”</span>' + sug +
+          '<span class="msg">' + esc(m.short || m.message) + '</span></li>';
+      }).join('');
+    return '<ul class="issue-list">' + rows + '</ul>';
+  }
+
+  function summaryHTML(all) {
+    if (!all.length) return '<b>No mistakes found. Well done!</b>';
+    var c = {};
+    all.forEach(function (m) { c[m.type] = (c[m.type] || 0) + 1; });
+    var chips = ['spelling', 'grammar', 'punctuation', 'style']
+      .filter(function (t) { return c[t]; })
+      .map(function (t) {
+        return '<span class="chip chip-' + t + '">' + c[t] + ' ' + TYPE_LABEL[t] + '</span>';
+      }).join(' ');
+    return '<b>' + all.length + ' issue' + (all.length === 1 ? '' : 's') + '</b> ' + chips;
+  }
+
+  function checkOne(text, language) {
+    if (!text || !text.trim()) return Promise.resolve({ matches: [] });
+    return fetch('/api/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: text, language: language }),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { return d.error ? { error: d.error, matches: [] } : d; })
+      .catch(function () { return { error: 'no connection', matches: [] }; });
+  }
+
+  function runAnalyze() {
+    var results = el('analyzeResults');
+    var summary = el('checkSummary');
+    var lang = el('langSel') ? el('langSel').value : 'en-US';
+    var t1 = answers.task1 || '';
+    var t2 = answers.task2 || '';
+
+    results.classList.remove('hidden');
+    el('anWc1').textContent = '(' + countWords(t1) + ' words)';
+    el('anWc2').textContent = '(' + countWords(t2) + ' words)';
+    // Show the essays right away; marks appear when the check returns.
+    el('anEssay1').innerHTML = plain(t1);
+    el('anEssay2').innerHTML = plain(t2);
+    el('anIssues1').innerHTML = '';
+    el('anIssues2').innerHTML = '';
+    summary.textContent = 'Checking your writing…';
+    summary.className = 'check-summary';
+
+    Promise.all([checkOne(t1, lang), checkOne(t2, lang)]).then(function (res) {
+      var err = (res[0] && res[0].error) || (res[1] && res[1].error);
+      if (err) {
+        summary.innerHTML = 'Couldn’t check the writing (' + esc(err) +
+          '). Your essay is shown unmarked — press Re-check to try again.';
+        summary.className = 'check-summary bad';
+        el('anEssay1').innerHTML = plain(t1);
+        el('anEssay2').innerHTML = plain(t2);
+        return;
+      }
+      el('anEssay1').innerHTML = renderMarked(t1, res[0].matches);
+      el('anEssay2').innerHTML = renderMarked(t2, res[1].matches);
+      el('anIssues1').innerHTML = renderIssues(t1, res[0].matches);
+      el('anIssues2').innerHTML = renderIssues(t2, res[1].matches);
+      summary.innerHTML = summaryHTML((res[0].matches || []).concat(res[1].matches || []));
+      summary.className = 'check-summary';
+    });
+  }
+
+  el('analyzeBtn').addEventListener('click', runAnalyze);
+  el('recheckBtn').addEventListener('click', runAnalyze);
+  el('langSel').addEventListener('change', runAnalyze);
+
+  // ---------- one-time "analyze at the end" tip ----------
+  //
+  // Shown once, the first time a student opens the exam on this device, so they
+  // know the feedback exists before they start writing. Remembered in
+  // localStorage so it never nags them again.
+
+  var TIP_KEY = 'wtt-analyze-tip-seen';
+  var tipTimer = null;
+
+  function tipSeen() {
+    try { return localStorage.getItem(TIP_KEY) === '1'; } catch (e) { return false; }
+  }
+
+  function showTipOnce() {
+    if (tipSeen()) return;
+    var tip = el('analyzeTip');
+    if (!tip) return;
+    tip.classList.remove('hidden');
+    try { localStorage.setItem(TIP_KEY, '1'); } catch (e) {} // truly one-time
+    tipTimer = setTimeout(dismissTip, 9000);                 // auto-hide
+  }
+
+  function dismissTip() {
+    var tip = el('analyzeTip');
+    if (!tip || tip.classList.contains('hidden')) return;
+    if (tipTimer) { clearTimeout(tipTimer); tipTimer = null; }
+    tip.classList.add('leaving');
+    setTimeout(function () {
+      tip.classList.add('hidden');
+      tip.classList.remove('leaving');
+    }, 280);
+  }
+
+  var tipBtn = el('tipDismiss');
+  if (tipBtn) tipBtn.addEventListener('click', dismissTip);
+
   // init
   validateNames();
+  showTipOnce();
 })();
