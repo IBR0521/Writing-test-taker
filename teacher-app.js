@@ -186,6 +186,70 @@
     if (idx != null) openEssay(currentSubs[Number(idx)]);
   });
 
+  // ---------- suggestions & problems ----------
+
+  function loadFeedback() {
+    fetch('/api/feedback?key=' + encodeURIComponent(KEY))
+      .then(function (r) {
+        if (!r.ok) throw new Error('forbidden');
+        return r.json();
+      })
+      .then(renderFeedback)
+      .catch(function () {
+        el('fbArea').innerHTML =
+          '<p class="empty">Could not load — is your teacher key correct?</p>';
+      });
+  }
+
+  function renderFeedback(items) {
+    var area = el('fbArea');
+    if (!items.length) {
+      area.innerHTML = '<p class="empty">No suggestions yet.</p>';
+      return;
+    }
+    area.innerHTML = '<ul class="fb-list">' + items.map(function (f) {
+      var isTeacher = f.role === 'teacher';
+      var who = isTeacher ? 'Teacher' : 'Student';
+      var name = f.name ? esc(f.name) : 'Anonymous';
+      return '<li class="fb-item">' +
+        '<div class="fb-meta"><span class="badge ' + (isTeacher ? 'fb-teacher' : 'fb-student') + '">' + who + '</span>' +
+        '<b>' + name + '</b><span class="muted">' + esc(when(f.createdAt)) + '</span></div>' +
+        '<p class="fb-msg">' + esc(f.message) + '</p></li>';
+    }).join('') + '</ul>';
+  }
+
+  el('fbForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var msg = el('fbMessage').value.trim();
+    if (!msg) return;
+    var status = el('fbStatus');
+    status.textContent = 'Sending…';
+    status.className = 'status';
+    fetch('/api/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: 'teacher', name: el('fbName').value.trim(), message: msg }),
+    })
+      .then(function (r) { if (!r.ok) throw new Error('failed'); })
+      .then(function () {
+        el('fbMessage').value = '';
+        status.textContent = '✅ Sent.';
+        status.className = 'status ok';
+        loadFeedback();
+      })
+      .catch(function () {
+        status.textContent = '⚠️ Could not send.';
+        status.className = 'status bad';
+      });
+  });
+
+  el('fbRefreshBtn').addEventListener('click', loadFeedback);
+  el('fbClearBtn').addEventListener('click', function () {
+    if (!confirm('Delete ALL suggestions? This cannot be undone.')) return;
+    fetch('/api/feedback?key=' + encodeURIComponent(KEY), { method: 'DELETE' })
+      .then(function () { loadFeedback(); });
+  });
+
   // ---- writing checker (teacher-only) --------------------------------------
 
   var TYPE_LABEL = {
@@ -410,5 +474,6 @@
   // init
   loadTasks();
   loadResults();
-  setInterval(loadResults, 5000); // live dashboard
+  loadFeedback();
+  setInterval(function () { loadResults(); loadFeedback(); }, 5000); // live dashboard
 })();

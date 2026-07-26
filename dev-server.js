@@ -19,6 +19,7 @@ const path = require('path');
 const {
   handleTasks,
   handleSubmissions,
+  handleFeedback,
   handleTeacher,
   handleCheck,
   respond,
@@ -77,6 +78,9 @@ const server = http.createServer(async (req, res) => {
   }
   if (p === '/api/submissions') {
     return respond(res, await handleSubmissions(method, query, await readBody(req)));
+  }
+  if (p === '/api/feedback') {
+    return respond(res, await handleFeedback(method, query, await readBody(req)));
   }
   if (p === '/api/check') {
     return respond(res, await handleCheck(method, query, await readBody(req)));

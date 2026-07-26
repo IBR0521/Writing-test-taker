@@ -544,6 +544,63 @@ table.results tbody tr:hover { background: var(--paper-2); }
 }
 .badge.ok { background: var(--green-soft); color: #12492f; }
 .badge.bad { background: var(--red-soft); color: #7a271b; }
+.badge.fb-teacher { background: var(--brand-tint); color: var(--brand-2); }
+.badge.fb-student { background: #f7eeda; color: #7a5c17; }
+
+.new-badge {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.14rem 0.5rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  background: var(--gold);
+  color: #fff;
+  border-radius: 999px;
+  vertical-align: middle;
+}
+
+/* suggestions & problems (shared by teacher panel and student finished screen) */
+.fb-form { display: grid; gap: 0.7rem; margin-bottom: 1.2rem; }
+.fb-form textarea {
+  width: 100%;
+  min-height: 90px;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  padding: 0.75rem 0.85rem;
+  border: 1.5px solid var(--rule-strong);
+  border-radius: 11px;
+  background: var(--paper-2);
+  color: var(--text);
+  resize: vertical;
+}
+.fb-form textarea:focus {
+  outline: none; border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-tint); background: var(--paper);
+}
+.fb-form-row { display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap; }
+.fb-form-row input[type="text"] {
+  flex: 1;
+  min-width: 10rem;
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  padding: 0.6rem 0.8rem;
+  border: 1.5px solid var(--rule-strong);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--text);
+}
+.fb-form-row input[type="text"]:focus {
+  outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-tint);
+}
+
+.fb-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.7rem; }
+.fb-item { padding: 0.85rem 1rem; background: var(--paper-2); border: 1px solid var(--rule); border-radius: 12px; }
+.fb-meta { display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap; margin-bottom: 0.35rem; font-size: 0.86rem; }
+.fb-meta .muted { font-size: 0.78rem; font-family: var(--font-mono); margin-left: auto; }
+.fb-msg { margin: 0; font-size: 0.92rem; line-height: 1.5; color: var(--text); white-space: pre-wrap; }
 
 .link-btn { background: none; color: var(--brand); padding: 0; font-size: 0.88rem; font-weight: 600; box-shadow: none; }
 .link-btn:hover { color: var(--brand-2); text-decoration: underline; }

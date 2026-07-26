@@ -365,6 +365,43 @@
 
   el('resendBtn').addEventListener('click', submitToTeacher);
 
+  // ---------- suggestions & problems ----------
+  //
+  // Goes straight to the teacher panel's "Suggestions & problems" list, same
+  // endpoint the teacher's own box posts to. The student's name is already
+  // known from the landing screen, so there's no separate name field here.
+
+  var fbForm = el('fbForm');
+  if (fbForm) {
+    fbForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var msg = el('fbMessage').value.trim();
+      if (!msg) return;
+      var status = el('fbStatus');
+      status.textContent = 'Sending…';
+      status.className = 'submit-status';
+      fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          role: 'student',
+          name: (student.firstName + ' ' + student.lastName).trim(),
+          message: msg,
+        }),
+      })
+        .then(function (r) { if (!r.ok) throw new Error('failed'); })
+        .then(function () {
+          el('fbMessage').value = '';
+          status.textContent = '✅ Sent to your teacher.';
+          status.className = 'submit-status ok';
+        })
+        .catch(function () {
+          status.textContent = '⚠️ Could not send. Try again in a moment.';
+          status.className = 'submit-status bad';
+        });
+    });
+  }
+
   // ---------- copy buttons ----------
 
   function copyText(text, btn) {
@@ -585,7 +622,7 @@
   // them again. The key is bumped whenever the message changes, so an updated
   // tip shows once more even to people who dismissed the old one.
 
-  var TIP_KEY = 'wtt-intro-tip-v3-seen';
+  var TIP_KEY = 'wtt-intro-tip-v4-seen';
   var tipTimer = null;
 
   function tipSeen() {

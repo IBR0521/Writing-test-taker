@@ -37,9 +37,26 @@ create table if not exists public.submissions (
   ended_at    timestamptz default now()
 );
 
+-- Feedback: suggestions & problem reports from both students and teachers,
+-- shown in the teacher panel's "Suggestions & problems" section.
+create table if not exists public.feedback (
+  id          bigint generated always as identity primary key,
+  role        text,          -- 'student' | 'teacher'
+  name        text,          -- optional
+  message     text,
+  created_at  timestamptz default now()
+);
+
 -- Row-Level Security ON with NO policies => the public "anon" key that would be
 -- exposed in a browser can read/write NOTHING here. Only the service-role key
 -- used by the server functions bypasses RLS. This is what keeps student
 -- browsers away from teacher data.
 alter table public.tasks       enable row level security;
 alter table public.submissions enable row level security;
+alter table public.feedback    enable row level security;
+
+-- ============================================================================
+-- Adding this to an EXISTING project? The block above (feedback table + RLS)
+-- is safe to paste into the SQL Editor and run on its own — `create table if
+-- not exists` won't touch your existing tasks/submissions data.
+-- ============================================================================

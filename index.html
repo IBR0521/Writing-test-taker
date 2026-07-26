@@ -151,6 +151,18 @@
           <button id="resendBtn" class="btn-ghost hidden">Resend to teacher</button>
         </div>
         <p id="submitStatus" class="submit-status"></p>
+
+        <div class="essay-block" id="feedbackBlock">
+          <div class="head"><p class="eyebrow gold">Suggestions &amp; problems</p></div>
+          <p class="lede small">Something not work right, or got flagged unfairly? Tell your teacher directly — it goes straight to their panel.</p>
+          <form id="fbForm" class="fb-form">
+            <textarea id="fbMessage" placeholder="What happened, or what would make this better?" required></textarea>
+            <div class="fb-form-row">
+              <button type="submit" class="btn-ghost">Send to teacher</button>
+              <span id="fbStatus" class="submit-status"></span>
+            </div>
+          </form>
+        </div>
       </article>
     </div>
   </section>
@@ -160,7 +172,7 @@
     <span class="tip-ico" aria-hidden="true">✍️</span>
     <div class="tip-body">
       <p class="tip-title">Good to know</p>
-      <p class="tip-text">When you finish, press <b>Analyze my writing</b> to see your spelling and grammar mistakes — and, new this time, your <b>approximate IELTS score</b> too. It grades gently, promise.</p>
+      <p class="tip-text">When you finish, press <b>Analyze my writing</b> to see your mistakes and approximate IELTS score. If anything felt off — or you've got an idea to make this better — there's now a <b>Suggestions &amp; problems</b> box there too, straight to your teacher.</p>
     </div>
     <button id="introTipDismiss" class="tip-close" aria-label="Dismiss tip">Got it</button>
   </div>
