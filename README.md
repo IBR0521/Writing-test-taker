@@ -93,6 +93,10 @@ Checking is done by the free [LanguageTool](https://languagetool.org) API throug
 - **The essay text is sent to languagetool.org** to be checked. If that's not acceptable for your students' data, either remove the feature or [self-host LanguageTool](https://dev.languagetool.org/http-server) and point `LT_ENDPOINT` in `lib/handlers.js` at your own server.
 - The free API is rate-limited (roughly 20 requests/minute). Checking a whole class very quickly may briefly fail — the essay is then shown unmarked with a notice, and **Re-check** retries.
 
+## Student results auto-expire
+
+Each result in the "Student results" register is deleted automatically **24 hours after it ended** — one at a time, not a bulk sweep. The teacher panel shows a live "Clears in" countdown per row (turning gold under an hour left). There's no background job: pruning happens the next time the list is loaded (the panel already polls every 5s while open), so it's effectively real-time whenever someone has it open, and catches up the moment it's reopened otherwise. "Clear all" still works too, for clearing everything immediately.
+
 ## Notes & limits
 
 - **A website cannot lock the whole laptop.** It can't block `Cmd/Alt+Tab`, `Cmd+Q`, or closing the browser — only native "kiosk" software can. So instead this **detects the moment a student leaves and ends the test**, flagging it to the teacher. That's the honest, browser-achievable version of lockdown.

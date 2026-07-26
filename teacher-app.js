@@ -131,6 +131,22 @@
     return d.toLocaleString();
   }
 
+  // Each result is auto-deleted 24h after it ended (see lib/store.js — kept in
+  // sync with SUBMISSION_TTL_MS there). This just renders the countdown; the
+  // server does the actual pruning next time the list is loaded.
+  var SUBMISSION_TTL_MS = 24 * 60 * 60 * 1000;
+
+  function fmtCountdown(endedAt) {
+    if (!endedAt) return '<span class="muted">—</span>';
+    var remaining = new Date(endedAt).getTime() + SUBMISSION_TTL_MS - Date.now();
+    if (remaining <= 0) return '<span class="muted">Clearing…</span>';
+    var h = Math.floor(remaining / 3600000);
+    var m = Math.floor((remaining % 3600000) / 60000);
+    var text = h > 0 ? (h + 'h ' + m + 'm') : (m + 'm');
+    var soon = remaining < 60 * 60 * 1000; // under 1 hour left
+    return '<span class="' + (soon ? 'cell-expiring' : 'muted') + '">' + text + '</span>';
+  }
+
   var currentSubs = [];
 
   function loadResults() {
@@ -165,13 +181,14 @@
         '<td data-label="Note">' + reason + '</td>' +
         '<td data-label="Words T1/T2">' + s.task1Words + ' / ' + s.task2Words + '</td>' +
         '<td data-label="Finished" class="muted">' + esc(when(s.endedAt)) + '</td>' +
+        '<td data-label="Clears in">' + fmtCountdown(s.endedAt) + '</td>' +
         '<td data-label="" class="cell-action"><button class="link-btn" data-view="' + i + '">View essays</button></td>' +
         '</tr>';
     }).join('');
 
     area.innerHTML =
       '<table class="results"><thead><tr>' +
-      '<th>Student</th><th>Status</th><th>Note</th><th>Words T1/T2</th><th>Finished</th><th></th>' +
+      '<th>Student</th><th>Status</th><th>Note</th><th>Words T1/T2</th><th>Finished</th><th>Clears in</th><th></th>' +
       '</tr></thead><tbody>' + rows + '</tbody></table>';
   }
 
