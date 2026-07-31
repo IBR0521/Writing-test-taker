@@ -20,7 +20,7 @@
   --rule-strong: #d6dcea;
   --text: #17213c;
   --muted: #5c6685;
-  --muted-2: #8b93ab;
+  --muted-2: #66739c;
 
   /* brand + accents */
   --brand: #2a4c8f;
@@ -31,7 +31,7 @@
   --red-soft: #fbe6e2;
   --green: #1f7a4d;
   --green-soft: #dcefe4;
-  --gold: #a9812f;
+  --gold: #8c6a26;
   --gold-light: #cfa94f;
 
   --shadow-card: 0 24px 60px -30px rgba(9, 16, 35, 0.55), 0 2px 6px rgba(9, 16, 35, 0.06);
@@ -62,6 +62,16 @@ body {
 
 .hidden { display: none !important; }
 .mono { font-family: var(--font-mono); }
+
+/* inline icon set — replaces emoji as functional UI icons everywhere */
+.ico {
+  width: 1em; height: 1em;
+  display: inline-block;
+  flex: none;
+  vertical-align: -0.15em;
+  stroke: currentColor;
+}
+.ico-lg { width: 1.5em; height: 1.5em; vertical-align: -0.28em; }
 
 /* ---------- typography primitives ---------- */
 
@@ -109,7 +119,11 @@ button:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
   color: #fff;
   box-shadow: var(--shadow-btn);
 }
-.btn-primary:hover:not(:disabled) { background: var(--brand-2); }
+.btn-primary:hover:not(:disabled) {
+  background: var(--brand-2);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 30px -14px rgba(31, 60, 118, 0.8);
+}
 
 .btn-ghost {
   background: var(--paper-2);
@@ -119,7 +133,13 @@ button:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
 .btn-ghost:hover:not(:disabled) { background: var(--paper-3); }
 
 .btn-ok { background: var(--green); color: #fff; box-shadow: 0 10px 22px -12px rgba(31, 122, 77, 0.7); }
-.btn-ok:hover:not(:disabled) { background: #196540; }
+.btn-ok:hover:not(:disabled) {
+  background: #196540;
+  transform: translateY(-2px);
+  box-shadow: 0 16px 30px -14px rgba(31, 122, 77, 0.8);
+}
+/* pressed state must win over the hover-lift above, even while still hovering */
+.btn-primary:active:not(:disabled), .btn-ok:active:not(:disabled) { transform: translateY(1px); }
 
 .btn-danger { background: var(--red-soft); color: var(--red-2); }
 .btn-danger:hover:not(:disabled) { background: #f7d5cf; }
@@ -254,7 +274,7 @@ button:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
   animation: toast-in 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 .tip-toast.leaving { animation: toast-out 0.28s ease forwards; }
-.tip-ico { font-size: 1.35rem; line-height: 1.4; flex: none; }
+.tip-ico { flex: none; color: var(--gold); margin-top: 0.15rem; }
 .tip-body { flex: 1; min-width: 0; }
 .tip-title {
   margin: 0 0 0.15rem;
@@ -417,7 +437,7 @@ button:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
   font-size: 1.05rem;
   line-height: 1.45;
 }
-.result-banner .emoji { font-size: 1.7rem; flex: none; }
+.result-banner .status-ico { width: 1.9rem; height: 1.9rem; flex: none; }
 .result-banner.ok { background: var(--green-soft); color: #12492f; border: 1px solid #a8d8bd; }
 .result-banner.bad { background: var(--red-soft); color: #7a271b; border: 1px solid #eeb1a7; }
 

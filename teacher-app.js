@@ -8,6 +8,10 @@
   var KEY = new URLSearchParams(location.search).get('key') || '';
   var el = function (id) { return document.getElementById(id); };
 
+  // Small inline icon set (replaces emoji as status indicators).
+  var ICO_CHECK = '<svg class="ico" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.6"/><path d="M6.5 10.2l2.2 2.2 4.3-4.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var ICO_WARN = '<svg class="ico" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 3.2l7.6 13.2a1 1 0 01-.87 1.5H3.27a1 1 0 01-.87-1.5L10 3.2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M10 8.2v3.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="10" cy="14.3" r="0.9" fill="currentColor"/></svg>';
+
   // Holds the currently loaded images as data URLs (base64).
   var images = { task1: null, task2: null };
 
@@ -45,7 +49,7 @@
       renderPreview(rm);
       // Apply immediately so the image is really gone for students, not just
       // hidden in the editor until the next Save.
-      publish('✅ Image removed. Students no longer see it.');
+      publish(ICO_CHECK + ' Image removed. Students no longer see it.');
     }
   });
 
@@ -107,11 +111,11 @@
     })
       .then(function (r) {
         if (!r.ok) throw new Error('save failed');
-        status.textContent = okMsg || '✅ Published. Students will see these tasks.';
+        status.innerHTML = okMsg || (ICO_CHECK + ' Published. Students will see these tasks.');
         status.className = 'status ok';
       })
       .catch(function () {
-        status.textContent = '⚠️ Could not save. Check your teacher link/key.';
+        status.innerHTML = ICO_WARN + ' Could not save. Check your teacher link/key.';
         status.className = 'status bad';
       });
   }
@@ -170,8 +174,8 @@
     }
     var rows = subs.map(function (s, i) {
       var badge = s.status === 'cheated'
-        ? '<span class="badge bad">⚠️ Cheated</span>'
-        : '<span class="badge ok">✅ Completed</span>';
+        ? '<span class="badge bad">' + ICO_WARN + ' Cheated</span>'
+        : '<span class="badge ok">' + ICO_CHECK + ' Completed</span>';
       var reason = s.status === 'cheated'
         ? esc(s.reason || 'Left the test') + ' <span class="muted">(during ' + esc(prettyPhase(s.phaseWhenEnded)) + ')</span>'
         : '<span class="muted">—</span>';
@@ -250,12 +254,12 @@
       .then(function (r) { if (!r.ok) throw new Error('failed'); })
       .then(function () {
         el('fbMessage').value = '';
-        status.textContent = '✅ Sent.';
+        status.innerHTML = ICO_CHECK + ' Sent.';
         status.className = 'status ok';
         loadFeedback();
       })
       .catch(function () {
-        status.textContent = '⚠️ Could not send.';
+        status.innerHTML = ICO_WARN + ' Could not send.';
         status.className = 'status bad';
       });
   });
@@ -426,8 +430,8 @@
       '<div class="modal-back" id="modalBack"><div class="modal">' +
       '<h2>' + esc(s.firstName) + ' ' + esc(s.lastName) + '</h2>' +
       '<p class="muted">' + (s.status === 'cheated'
-        ? '⚠️ Ended early — ' + esc(s.reason || 'left the test')
-        : '✅ Completed') + ' &middot; ' + esc(when(s.endedAt)) + '</p>' +
+        ? ICO_WARN + ' Ended early — ' + esc(s.reason || 'left the test')
+        : ICO_CHECK + ' Completed') + ' &middot; ' + esc(when(s.endedAt)) + '</p>' +
 
       '<div id="scoreRoot"></div>' +
 

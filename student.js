@@ -51,6 +51,12 @@
 
   // ---------- helpers ----------
 
+  // Small inline icon set (replaces emoji as status indicators).
+  var ICO_CHECK = '<svg class="ico" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.6"/><path d="M6.5 10.2l2.2 2.2 4.3-4.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var ICO_WARN = '<svg class="ico" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 3.2l7.6 13.2a1 1 0 01-.87 1.5H3.27a1 1 0 01-.87-1.5L10 3.2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M10 8.2v3.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="10" cy="14.3" r="0.9" fill="currentColor"/></svg>';
+  var ICO_CHECK_LG = ICO_CHECK.replace('class="ico"', 'class="ico ico-lg"');
+  var ICO_WARN_LG = ICO_WARN.replace('class="ico"', 'class="ico ico-lg"');
+
   function countWords(s) {
     var t = (s || '').trim();
     if (!t) return 0;
@@ -307,12 +313,12 @@
     var text = el('resultText');
     if (cheated) {
       banner.className = 'result-banner bad';
-      banner.querySelector('.emoji').textContent = '⚠️';
+      el('resultIco').innerHTML = ICO_WARN_LG;
       text.innerHTML = '<strong>Exam ended — you left the page.</strong><br>' +
         'Reason: ' + reason + '. Your teacher has been told.';
     } else {
       banner.className = 'result-banner ok';
-      banner.querySelector('.emoji').textContent = '✅';
+      el('resultIco').innerHTML = ICO_CHECK_LG;
       text.innerHTML = '<strong>Exam complete.</strong> Well done!';
     }
 
@@ -352,12 +358,12 @@
     })
       .then(function (r) {
         if (!r.ok) throw new Error('bad status');
-        status.textContent = '✅ Your result was sent to the teacher.';
+        status.innerHTML = ICO_CHECK + ' Your result was sent to the teacher.';
         status.className = 'submit-status ok';
         resend.classList.add('hidden');
       })
       .catch(function () {
-        status.textContent = '⚠️ Could not reach the teacher. Copy your answers and send them on Telegram, then press Resend.';
+        status.innerHTML = ICO_WARN + ' Could not reach the teacher. Copy your answers and send them on Telegram, then press Resend.';
         status.className = 'submit-status bad';
         resend.classList.remove('hidden');
       });
@@ -392,11 +398,11 @@
         .then(function (r) { if (!r.ok) throw new Error('failed'); })
         .then(function () {
           el('fbMessage').value = '';
-          status.textContent = '✅ Sent to your teacher.';
+          status.innerHTML = ICO_CHECK + ' Sent to your teacher.';
           status.className = 'submit-status ok';
         })
         .catch(function () {
-          status.textContent = '⚠️ Could not send. Try again in a moment.';
+          status.innerHTML = ICO_WARN + ' Could not send. Try again in a moment.';
           status.className = 'submit-status bad';
         });
     });
