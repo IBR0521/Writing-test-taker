@@ -492,9 +492,43 @@
       .then(function () { loadResults(); });
   });
 
+  // ---------- one-time note from the developer ----------
+  //
+  // Shown once per browser, same idea as the student-side tips. The key is
+  // bumped whenever the message changes so an update shows once more.
+
+  var DEVNOTE_KEY = 'wtt-teacher-devnote-tip-v1-seen';
+  var devNoteTimer = null;
+
+  function showDevNoteOnce() {
+    var seen;
+    try { seen = localStorage.getItem(DEVNOTE_KEY) === '1'; } catch (e) { seen = false; }
+    if (seen) return;
+    var tip = el('devNoteTip');
+    if (!tip) return;
+    tip.classList.remove('hidden');
+    try { localStorage.setItem(DEVNOTE_KEY, '1'); } catch (e) {} // truly one-time
+    devNoteTimer = setTimeout(dismissDevNote, 35000); // auto-hide — long enough to actually read
+  }
+
+  function dismissDevNote() {
+    var tip = el('devNoteTip');
+    if (devNoteTimer) { clearTimeout(devNoteTimer); devNoteTimer = null; }
+    if (!tip || tip.classList.contains('hidden')) return;
+    tip.classList.add('leaving');
+    setTimeout(function () {
+      tip.classList.add('hidden');
+      tip.classList.remove('leaving');
+    }, 280);
+  }
+
+  var devNoteBtn = el('devNoteTipDismiss');
+  if (devNoteBtn) devNoteBtn.addEventListener('click', dismissDevNote);
+
   // init
   loadTasks();
   loadResults();
   loadFeedback();
+  showDevNoteOnce();
   setInterval(function () { loadResults(); loadFeedback(); }, 5000); // live dashboard
 })();

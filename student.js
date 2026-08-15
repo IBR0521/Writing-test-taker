@@ -620,45 +620,61 @@
   el('recheckBtn').addEventListener('click', runAnalyze);
   el('langSel').addEventListener('change', runAnalyze);
 
-  // ---------- one-time intro tip ----------
+  // ---------- one-time tips ----------
   //
-  // A single toast a student sees once, the first time they open the exam on
-  // this device: it points out the "Analyze my writing" feedback (mistakes +
-  // an approximate IELTS score). Remembered in localStorage so it never nags
-  // them again. The key is bumped whenever the message changes, so an updated
-  // tip shows once more even to people who dismissed the old one.
+  // Small toasts a student sees once each, the first time they open the exam
+  // on this device. Listed oldest-first; on each visit the next one they
+  // haven't seen yet pops up (one at a time, never stacked). Each is
+  // remembered in localStorage so it never nags them again. A tip's key is
+  // bumped whenever its message changes, so an update shows once more even to
+  // people who already dismissed the old version.
 
-  var TIP_KEY = 'wtt-intro-tip-v4-seen';
+  var TIPS = [
+    { key: 'wtt-intro-tip-v4-seen', el: 'introTip', btn: 'introTipDismiss' },
+    { key: 'wtt-devnote-tip-v1-seen', el: 'devNoteTip', btn: 'devNoteTipDismiss' },
+  ];
   var tipTimer = null;
+  var activeTip = null;
 
-  function tipSeen() {
-    try { return localStorage.getItem(TIP_KEY) === '1'; } catch (e) { return false; }
+  function tipSeen(key) {
+    try { return localStorage.getItem(key) === '1'; } catch (e) { return false; }
+  }
+  function markTipSeen(key) {
+    try { localStorage.setItem(key, '1'); } catch (e) {}
   }
 
-  function showTipOnce() {
-    if (tipSeen()) return;
-    var tip = el('introTip');
-    if (!tip) return;
-    tip.classList.remove('hidden');
-    try { localStorage.setItem(TIP_KEY, '1'); } catch (e) {} // truly one-time
-    tipTimer = setTimeout(dismissTip, 9000);                 // auto-hide
+  function showNextTip() {
+    for (var i = 0; i < TIPS.length; i++) {
+      if (!tipSeen(TIPS[i].key) && el(TIPS[i].el)) { showTip(TIPS[i]); return; }
+    }
+  }
+
+  function showTip(tip) {
+    activeTip = tip;
+    el(tip.el).classList.remove('hidden');
+    markTipSeen(tip.key);                    // truly one-time
+    tipTimer = setTimeout(dismissTip, 35000); // auto-hide — long enough to actually read
   }
 
   function dismissTip() {
-    var tip = el('introTip');
     if (tipTimer) { clearTimeout(tipTimer); tipTimer = null; }
-    if (!tip || tip.classList.contains('hidden')) return;
-    tip.classList.add('leaving');
+    if (!activeTip) return;
+    var box = el(activeTip.el);
+    activeTip = null;
+    if (!box || box.classList.contains('hidden')) return;
+    box.classList.add('leaving');
     setTimeout(function () {
-      tip.classList.add('hidden');
-      tip.classList.remove('leaving');
+      box.classList.add('hidden');
+      box.classList.remove('leaving');
     }, 280);
   }
 
-  var tipBtn = el('introTipDismiss');
-  if (tipBtn) tipBtn.addEventListener('click', dismissTip);
+  TIPS.forEach(function (t) {
+    var b = el(t.btn);
+    if (b) b.addEventListener('click', dismissTip);
+  });
 
   // init
   validateNames();
-  showTipOnce();
+  showNextTip();
 })();
